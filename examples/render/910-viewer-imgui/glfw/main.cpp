@@ -64,6 +64,7 @@ int main(int argc, char** argv)
 
     // load and set up a drawable mesh
     vcl::DrawableMesh<vcl::TriMesh> drawable = getDrawableMesh<vcl::TriMesh>();
+    drawable.setWireframeType(vcl::lines::LinesTypes::INDIRECT_BASED);
     
     // add the drawable mesh to the scene
     // the viewer will own **a copy** of the drawable mesh

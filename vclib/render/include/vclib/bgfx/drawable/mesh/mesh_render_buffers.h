@@ -58,7 +58,14 @@ class MeshRenderBuffers : public vcl::MeshRenderData<MeshType>
     bgfx::IndexBufferHandle mEdgeNormalBH = BGFX_INVALID_HANDLE;
     bgfx::IndexBufferHandle mEdgeColorBH  = BGFX_INVALID_HANDLE;
 
-    lines::CPUGeneratedLines mWireframeBH;
+
+    lines::LinesTypes mWireframeType = lines::LinesTypes::CPU_GENERATED;
+
+    lines::CPUGeneratedLines        mCPUWireframeBH;
+    lines::GPUGeneratedLines        mGPUWireframeBH;
+    lines::InstancingBasedLines     mInstancingWireframeBH;
+    lines::IndirectBasedLines       mIndirectWireframeBH;
+    lines::TextureBasedLines        mTextureWireframeBH;
 
     std::vector<std::pair<bgfx::TextureHandle, bgfx::UniformHandle>> mTexturesH;
 
@@ -73,8 +80,14 @@ public:
     MeshRenderBuffers(const MeshRenderBuffers& other) : Base(other)
     {
         // each object has its own bgfx buffers
+        mWireframeType = other.mWireframeType;
         createBGFXBuffers();
-        mWireframeBH.setSettings(*other.mWireframeBH.getSettings());
+        
+        mCPUWireframeBH.setSettings(*other.mCPUWireframeBH.getSettings());
+        mGPUWireframeBH.setSettings(*other.mGPUWireframeBH.getSettings());
+        mInstancingWireframeBH.setSettings(*other.mInstancingWireframeBH.getSettings());
+        mIndirectWireframeBH.setSettings(*other.mIndirectWireframeBH.getSettings());
+        mTextureWireframeBH.setSettings(*other.mTextureWireframeBH.getSettings());
     }
 
     MeshRenderBuffers(MeshRenderBuffers&& other) { swap(other); }
@@ -104,8 +117,13 @@ public:
         swap(mEdgeNormalBH, other.mEdgeNormalBH);
         swap(mEdgeColorBH, other.mEdgeColorBH);
         swap(mTexturesH, other.mTexturesH);
+        swap(mWireframeType, mWireframeType);
 
-        mWireframeBH.swap(other.mWireframeBH);
+        mCPUWireframeBH.swap(other.mCPUWireframeBH);
+        mGPUWireframeBH.swap(other.mGPUWireframeBH);
+        mInstancingWireframeBH.swap(other.mInstancingWireframeBH);
+        mIndirectWireframeBH.swap(other.mIndirectWireframeBH);
+        mTextureWireframeBH.swap(other.mTextureWireframeBH);
     }
 
     friend void swap(MeshRenderBuffers& a, MeshRenderBuffers& b) { a.swap(b); }
@@ -188,9 +206,58 @@ public:
         }
     }
 
+    void setWireframeType(const lines::LinesTypes type) 
+    {
+        mWireframeType = type;
+    }
+
+    void drawWireframe(uint viewId) const 
+    {
+        switch (mWireframeType) {
+            case lines::LinesTypes::CPU_GENERATED: 
+                mCPUWireframeBH.draw(viewId);
+                break;
+
+            case lines::LinesTypes::GPU_GENERATED: 
+                mGPUWireframeBH.draw(viewId);
+                break;
+
+            case lines::LinesTypes::INSTANCING_BASED:
+                mInstancingWireframeBH.draw(viewId);
+                break;
+
+            case lines::LinesTypes::INDIRECT_BASED:
+                mIndirectWireframeBH.draw(viewId);
+                break;
+
+            case lines::LinesTypes::TEXTURE_BASED: 
+                mTextureWireframeBH.draw(viewId);
+                break;
+        }
+    }
+
+    void bindTextures() const
+    {
+        uint i = VCL_MRB_TEXTURE0; // first slot available is VCL_MRB_TEXTURE0
+        for (auto [th, uh] : mTexturesH) {
+            bgfx::setTexture(i, uh, th);
+            i++;
+        }
+    }
+
     void setWireframeSettings(const MeshRenderSettings& settings) 
     {
-        lines::LinesSettings *wireframeSettings = mWireframeBH.getSettings();
+        setWireframeSettings(settings, mCPUWireframeBH.getSettings());
+        setWireframeSettings(settings, mGPUWireframeBH.getSettings());
+        setWireframeSettings(settings, mInstancingWireframeBH.getSettings());
+        setWireframeSettings(settings, mIndirectWireframeBH.getSettings());
+        setWireframeSettings(settings, mTextureWireframeBH.getSettings());
+    }
+
+private:
+
+    void setWireframeSettings(const MeshRenderSettings& settings, lines::LinesSettings *wireframeSettings) 
+    {
         wireframeSettings->setThickness(settings.wireframeWidth());
 
         if(settings.isWireframeColorUserDefined()) {
@@ -210,21 +277,6 @@ public:
         }
     }
 
-    void drawWireframe(uint viewId) const 
-    {
-        mWireframeBH.draw(viewId);
-    }
-
-    void bindTextures() const
-    {
-        uint i = VCL_MRB_TEXTURE0; // first slot available is VCL_MRB_TEXTURE0
-        for (auto [th, uh] : mTexturesH) {
-            bgfx::setTexture(i, uh, th);
-            i++;
-        }
-    }
-
-private:
     void createBGFXBuffers()
     {
         // vertex buffer (positions)
@@ -364,7 +416,13 @@ private:
 
         // wireframe index buffer
         if (Base::wireframeBufferData()) {
-            mWireframeBH = lines::CPUGeneratedLines(*Base::wireframeBufferData());
+            const bgfx::Caps* caps = bgfx::getCaps();
+
+            mCPUWireframeBH = lines::CPUGeneratedLines(*Base::wireframeBufferData());
+            mGPUWireframeBH = lines::GPUGeneratedLines(*Base::wireframeBufferData());
+            // mInstancingWireframeBH = lines::InstancingBasedLines(*Base::wireframeBufferData());
+            mIndirectWireframeBH = lines::IndirectBasedLines(*Base::wireframeBufferData());
+            mTextureWireframeBH = lines::TextureBasedLines(*Base::wireframeBufferData(), caps->limits.maxTextureSize);
         }
 
         // textures

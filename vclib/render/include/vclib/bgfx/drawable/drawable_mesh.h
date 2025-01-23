@@ -153,6 +153,11 @@ public:
         mMeshRenderSettingsUniforms.updateSettings(rs);
     }
 
+    void setWireframeType(const lines::LinesTypes type) 
+    {
+        mMRB.setWireframeType(type);
+    }
+
 private:
     void bindUniforms(uint primitive) const
     {
