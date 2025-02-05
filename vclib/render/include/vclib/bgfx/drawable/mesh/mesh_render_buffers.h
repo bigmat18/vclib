@@ -552,6 +552,44 @@ private:
 
             mEdgeIndexBuffer.create(buffer, mesh.edgeNumber() * 2);
         }
+
+        // edge index buffer
+        if (Base::edgeBufferData()) {
+            mEdgeIndexBH = bgfx::createIndexBuffer(
+                bgfx::makeRef(
+                    Base::edgeBufferData(),
+                    Base::edgeBufferSize() * sizeof(uint32_t)),
+                BGFX_BUFFER_INDEX32);
+        }
+
+        // edge normal buffer
+        if (Base::edgeNormalBufferData()) {
+            mEdgeNormalBH = bgfx::createIndexBuffer(
+                bgfx::makeRef(
+                    Base::edgeNormalBufferData(),
+                    Base::edgeNumber() * 3 * sizeof(float)),
+                BGFX_BUFFER_COMPUTE_FORMAT_32X1 | BGFX_BUFFER_COMPUTE_READ |
+                    BGFX_BUFFER_COMPUTE_TYPE_FLOAT);
+        }
+
+        // edge color buffer
+        if (Base::edgeColorBufferData()) {
+            mEdgeColorBH = bgfx::createIndexBuffer(
+                bgfx::makeRef(
+                    Base::edgeColorBufferData(),
+                    Base::edgeNumber() * sizeof(uint32_t)),
+                BGFX_BUFFER_INDEX32 | BGFX_BUFFER_COMPUTE_READ);
+        }
+
+        // wireframe index buffer
+        if (Base::wireframeBufferData()) {
+            const bgfx::Caps* caps = bgfx::getCaps();
+
+            mCPUWireframeBH = lines::CPUGeneratedLines(*Base::wireframeBufferData());
+            mGPUWireframeBH = lines::GPUGeneratedLines(*Base::wireframeBufferData());
+            // mInstancingWireframeBH = lines::InstancingBasedLines(*Base::wireframeBufferData());
+            mIndirectWireframeBH = lines::IndirectBasedLines(*Base::wireframeBufferData());
+            mTextureWireframeBH = lines::TextureBasedLines(*Base::wireframeBufferData(), caps->limits.maxTextureSize);
     }
 
     void createEdgeNormalsBuffer(const MeshType& mesh)
