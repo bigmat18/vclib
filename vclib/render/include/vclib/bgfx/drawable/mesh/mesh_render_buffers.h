@@ -63,7 +63,12 @@ class MeshRenderBuffers
     IndexBuffer mEdgeNormalBuffer;
     IndexBuffer mEdgeColorBuffer;
 
-    lines::GPUGeneratedLines mWireframeBH;
+    lines::CPUGeneratedLines        mWireframeBHCPU;
+    lines::GPUGeneratedLines        mWireframeBHGPU;
+    lines::InstancingBasedLines     mWireframeBHInstancing;
+    lines::IndirectBasedLines       mWireframeBHIndirect;
+    lines::TextureBasedLines        mWireframeBHTexture;
+    lines::LinesTypes               mWireframeType = lines::LinesTypes::CPU_GENERATED;
 
     std::vector<std::unique_ptr<TextureUnit>> mTextureUnits;
 
@@ -111,7 +116,14 @@ public:
         swap(mEdgeNormalBuffer, other.mEdgeNormalBuffer);
         swap(mEdgeColorBuffer, other.mEdgeColorBuffer);
 
-        mWireframeBH.swap(other.mWireframeBH);
+        mWireframeBHCPU.swap(other.mWireframeBHCPU);
+        mWireframeBHGPU.swap(other.mWireframeBHGPU);
+        mWireframeBHInstancing.swap(other.mWireframeBHInstancing);
+        mWireframeBHIndirect.swap(other.mWireframeBHIndirect);
+        mWireframeBHTexture.swap(other.mWireframeBHTexture);
+
+        swap(mWireframeType, other.mWireframeType);
+
         swap(mTextureUnits, other.mTextureUnits);
         swap(mMeshUniforms, other.mMeshUniforms);
     }
@@ -162,7 +174,21 @@ public:
         }
     }
 
-    void setWireframeSettings(const MeshRenderSettings& settings)
+    void setWireframeType(const lines::LinesTypes type) 
+    {
+        mWireframeType = type;
+    }
+
+    void setAllWireframeSettings(const MeshRenderSettings& settings)
+    {
+        setWireframeSettings(settings, mWireframeBHCPU);
+        setWireframeSettings(settings, mWireframeBHGPU);
+        setWireframeSettings(settings, mWireframeBHInstancing);
+        setWireframeSettings(settings, mWireframeBHIndirect);
+        setWireframeSettings(settings, mWireframeBHTexture);
+    }
+
+    void setWireframeSettings(const MeshRenderSettings& settings, lines::Lines& mWireframeBH)
     {
         lines::LinesSettings& wSettings = mWireframeBH.settings();
         wSettings.setThickness(settings.wireframeWidth());
@@ -194,7 +220,30 @@ public:
 
     void drawWireframe(uint viewId) const 
     {
-        mWireframeBH.draw(viewId);
+        switch(mWireframeType) {
+            case lines::LinesTypes::CPU_GENERATED:
+                mWireframeBHCPU.draw(viewId);
+                std::cout << "CPU" << std::endl;
+                break;
+            case lines::LinesTypes::GPU_GENERATED:
+                mWireframeBHGPU.draw(viewId);
+                std::cout << "GPU" << std::endl;
+                break;
+            case lines::LinesTypes::INSTANCING_BASED:
+                mWireframeBHInstancing.draw(viewId);
+                std::cout << "Instancing" << std::endl;
+                break;
+            case lines::LinesTypes::INDIRECT_BASED:
+                mWireframeBHIndirect.draw(viewId);
+                std::cout << "Indirect" << std::endl;
+                break;
+            case lines::LinesTypes::TEXTURE_BASED:
+                mWireframeBHTexture.draw(viewId);
+                std::cout << "Texture" << std::endl;
+                break;
+            default:
+                break;
+        }
     }
 
     void bindTextures() const
@@ -634,8 +683,18 @@ private:
                 }
             }
             // wireframe index buffer
-            decltype(mWireframeBH) wir(wireframe);
-            mWireframeBH.swap(wir);
+            lines::CPUGeneratedLines        wirCPU(wireframe);
+            lines::GPUGeneratedLines        wirGPU(wireframe);
+            lines::InstancingBasedLines     wirInstancing(wireframe);
+            lines::IndirectBasedLines       wirIndirect(wireframe);
+            lines::TextureBasedLines        wirTexture(wireframe);
+
+            mWireframeBHCPU.swap(wirCPU);
+            mWireframeBHGPU.swap(wirGPU);
+            mWireframeBHInstancing.swap(wirInstancing);
+            mWireframeBHIndirect.swap(wirIndirect);
+            mWireframeBHTexture.swap(wirTexture);
+
 
             // TODO: Should Be:
             // const uint NUM_EDGES =

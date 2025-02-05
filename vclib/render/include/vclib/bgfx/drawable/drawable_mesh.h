@@ -103,7 +103,7 @@ public:
 
         mMRB.update(*this);
         mMRS.setRenderCapabilityFrom(*this);
-        mMRB.setWireframeSettings(mMRS);
+        mMRB.setAllWireframeSettings(mMRS);
         mMeshRenderSettingsUniforms.updateSettings(mMRS);
     }
 
@@ -183,7 +183,7 @@ public:
     void setRenderSettings(const MeshRenderSettings& rs) override
     {
         AbstractDrawableMesh::setRenderSettings(rs);
-        mMRB.setWireframeSettings(rs); // TODO check me
+        mMRB.setAllWireframeSettings(rs); // TODO check me
         mMeshRenderSettingsUniforms.updateSettings(rs);
     }
 

@@ -46,6 +46,8 @@ inline vcl::DrawableMesh<MeshType> getDrawableMesh(
     // options of the mesh
     // default is what we want: color per vertex, smooth shading, no wireframe
     vcl::MeshRenderSettings settings(m);
+    settings.setWireframeVisibility(true);
+    settings.setSurfaceVisibility(false);
 
     // create a DrawableMesh object from the mesh
     vcl::DrawableMesh<MeshType> drawable(m);

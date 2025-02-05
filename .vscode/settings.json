@@ -43,5 +43,26 @@
         "Unwrapper",
         "vclib"
     ],
-    "doxygen_runner.configuration_file_override": "${workspaceFolder}/docs/Doxyfile"
+    "doxygen_runner.configuration_file_override": "${workspaceFolder}/docs/Doxyfile",
+    "files.associations": {
+        "*.sc": "glsl",
+        "__bit_reference": "cpp",
+        "__node_handle": "cpp",
+        "any": "cpp",
+        "array": "cpp",
+        "memory": "cpp",
+        "fstream": "cpp",
+        "future": "cpp",
+        "ios": "cpp",
+        "istream": "cpp",
+        "optional": "cpp",
+        "ostream": "cpp",
+        "regex": "cpp",
+        "sstream": "cpp",
+        "streambuf": "cpp",
+        "string_view": "cpp",
+        "tuple": "cpp",
+        "variant": "cpp",
+        "vector": "cpp"
+    }
 }
