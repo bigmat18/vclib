@@ -105,28 +105,28 @@ function(_bgfx_compile_shader_to_header)
 
             # if VARYINGDEF is not empty
             if(NOT "${ARGS_VARYING_DEF}" STREQUAL "")
-            _bgfx_shaderc_parse(
-                CLI #
-                ${ARGS_TYPE} ${PLATFORM_I} WERROR "$<$<CONFIG:debug>:DEBUG>$<$<CONFIG:relwithdebinfo>:DEBUG>"
-                FILE ${SHADER_FILE_ABSOLUTE}
-                OUTPUT ${OUTPUT}
-                PROFILE ${PROFILE}
-                O "$<$<CONFIG:debug>:0>$<$<CONFIG:release>:3>$<$<CONFIG:relwithdebinfo>:3>$<$<CONFIG:minsizerel>:3>"
-                VARYINGDEF ${ARGS_VARYING_DEF}
-                INCLUDES ${BGFX_SHADER_INCLUDE_PATH} ${ARGS_INCLUDE_DIRS}
-                BIN2C BIN2C ${SHADER_FILE_NAME_WE}_${PROFILE_EXT}
-                )
+                _bgfx_shaderc_parse(
+                    CLI #
+                    ${ARGS_TYPE} ${PLATFORM_I} WERROR "$<$<CONFIG:debug>:DEBUG>$<$<CONFIG:relwithdebinfo>:DEBUG>"
+                    FILE ${SHADER_FILE_ABSOLUTE}
+                    OUTPUT ${OUTPUT}
+                    PROFILE ${PROFILE}
+                    O "$<$<CONFIG:debug>:0>$<$<CONFIG:release>:3>$<$<CONFIG:relwithdebinfo>:3>$<$<CONFIG:minsizerel>:3>"
+                    VARYINGDEF ${ARGS_VARYING_DEF}
+                    INCLUDES ${BGFX_SHADER_INCLUDE_PATH} ${ARGS_INCLUDE_DIRS}
+                    BIN2C BIN2C ${SHADER_FILE_NAME_WE}_${PROFILE_EXT}
+                    )
             else()
-            _bgfx_shaderc_parse(
-                CLI #
-                ${ARGS_TYPE} ${PLATFORM_I} WERROR "$<$<CONFIG:debug>:DEBUG>$<$<CONFIG:relwithdebinfo>:DEBUG>"
-                FILE ${SHADER_FILE_ABSOLUTE}
-                OUTPUT ${OUTPUT}
-                PROFILE ${PROFILE}
-                O "$<$<CONFIG:debug>:0>$<$<CONFIG:release>:3>$<$<CONFIG:relwithdebinfo>:3>$<$<CONFIG:minsizerel>:3>"
-                INCLUDES ${BGFX_SHADER_INCLUDE_PATH} ${ARGS_INCLUDE_DIRS}
-                BIN2C BIN2C ${SHADER_FILE_NAME_WE}_${PROFILE_EXT}
-            )
+                _bgfx_shaderc_parse(
+                    CLI #
+                    ${ARGS_TYPE} ${PLATFORM_I} WERROR "$<$<CONFIG:debug>:DEBUG>$<$<CONFIG:relwithdebinfo>:DEBUG>"
+                    FILE ${SHADER_FILE_ABSOLUTE}
+                    OUTPUT ${OUTPUT}
+                    PROFILE ${PROFILE}
+                    O "$<$<CONFIG:debug>:0>$<$<CONFIG:release>:3>$<$<CONFIG:relwithdebinfo>:3>$<$<CONFIG:minsizerel>:3>"
+                    INCLUDES ${BGFX_SHADER_INCLUDE_PATH} ${ARGS_INCLUDE_DIRS}
+                    BIN2C BIN2C ${SHADER_FILE_NAME_WE}_${PROFILE_EXT}
+                )
             endif()
 
             list(APPEND OUTPUTS ${OUTPUT})
@@ -217,16 +217,15 @@ function(_add_bgfx_shader FILE DIR TARGET)
         endif()
 
         # essl
-        if(NOT "${TYPE}" STREQUAL "COMPUTE")
-            set(ESSL_OUTPUT ${BGFX_SHADERS_OUTPUT_DIR}/essl/${DIR}/${FILENAME}.bin)
-            _bgfx_shaderc_parse(
-                ESSL ${COMMON} 
-                ANDROID PROFILE ${ESSL_PROFILE} 
-                OUTPUT ${ESSL_OUTPUT}
-                INCLUDES ${BGFX_SHADER_INCLUDE_PATH})
-            list(APPEND OUTPUTS "ESSL")
-            set(OUTPUTS_PRETTY "${OUTPUTS_PRETTY}ESSL, ")
-        endif()
+        set(ESSL_OUTPUT ${BGFX_SHADERS_OUTPUT_DIR}/essl/${DIR}/${FILENAME}.bin)
+        _bgfx_shaderc_parse(
+            ESSL ${COMMON}
+            ANDROID PROFILE ${ESSL_PROFILE}
+            OUTPUT ${ESSL_OUTPUT}
+            INCLUDES ${BGFX_SHADER_INCLUDE_PATH})
+        list(APPEND OUTPUTS "ESSL")
+        set(OUTPUTS_PRETTY "${OUTPUTS_PRETTY}ESSL, ")
+
 
         # glsl
         set(GLSL_OUTPUT ${BGFX_SHADERS_OUTPUT_DIR}/glsl/${DIR}/${FILENAME}.bin)
@@ -248,18 +247,16 @@ function(_add_bgfx_shader FILE DIR TARGET)
         set(OUTPUTS_PRETTY "${OUTPUTS_PRETTY}GLSL, ")
 
         # spirv
-        if(NOT "${TYPE}" STREQUAL "COMPUTE")
-            set(SPIRV_OUTPUT ${BGFX_SHADERS_OUTPUT_DIR}/spirv/${DIR}/${FILENAME}.bin)
-            _bgfx_shaderc_parse(
-                SPIRV ${COMMON} LINUX PROFILE 
-                ${SPIRV_PROFILE} 
-                OUTPUT ${SPIRV_OUTPUT}
-                INCLUDES ${BGFX_SHADER_INCLUDE_PATH})
-            list(APPEND OUTPUTS "SPIRV")
-            set(OUTPUTS_PRETTY "${OUTPUTS_PRETTY}SPIRV")
-            set(OUTPUT_FILES "")
-            set(COMMANDS "")
-        endif()
+        set(SPIRV_OUTPUT ${BGFX_SHADERS_OUTPUT_DIR}/spirv/${DIR}/${FILENAME}.bin)
+        _bgfx_shaderc_parse(
+            SPIRV ${COMMON} LINUX PROFILE
+            ${SPIRV_PROFILE}
+            OUTPUT ${SPIRV_OUTPUT}
+            INCLUDES ${BGFX_SHADER_INCLUDE_PATH})
+        list(APPEND OUTPUTS "SPIRV")
+        set(OUTPUTS_PRETTY "${OUTPUTS_PRETTY}SPIRV")
+        set(OUTPUT_FILES "")
+        set(COMMANDS "")
 
         foreach(OUT ${OUTPUTS})
             list(APPEND OUTPUT_FILES ${${OUT}_OUTPUT})

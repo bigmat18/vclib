@@ -1,4 +1,27 @@
-#include "bgfx_compute.sh"
+/*****************************************************************************
+ * VCLib                                                                     *
+ * Visual Computing Library                                                  *
+ *                                                                           *
+ * Copyright(C) 2021-2025                                                    *
+ * Visual Computing Lab                                                      *
+ * ISTI - Italian National Research Council                                  *
+ *                                                                           *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This program is free software; you can redistribute it and/or modify      *
+ * it under the terms of the Mozilla Public License Version 2.0 as published *
+ * by the Mozilla Foundation; either version 2 of the License, or            *
+ * (at your option) any later version.                                       *
+ *                                                                           *
+ * This program is distributed in the hope that it will be useful,           *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the              *
+ * Mozilla Public License Version 2.0                                        *
+ * (https://www.mozilla.org/en-US/MPL/2.0/) for more details.                *
+ ****************************************************************************/
+
+#include <bgfx_compute.sh>
+
 #include "../../utils.sh"
 
 BUFFER_RO(pointsBuffer,      float,  0);
@@ -15,8 +38,8 @@ void main() {
 
     vec3 p0        = p((gl_WorkGroupID.x * 2));
     vec3 p1        = p((gl_WorkGroupID.x * 2) + 1);
-    float color    = color((gl_WorkGroupID.x * 2) + (1 - ((gl_LocalInvocationID.x + 1) % 2)));
-    vec3 normal    = normal((gl_WorkGroupID.x * 2) + (1 - ((gl_LocalInvocationID.x + 1) % 2)));
+    float color    = color((gl_WorkGroupID.x * 2) + (1 - ((uint)(gl_LocalInvocationID.x + 1) % 2)));
+    vec3 normal    = normal((gl_WorkGroupID.x * 2) + (1 - ((uint)(gl_LocalInvocationID.x + 1) % 2)));
 
     vertexBuffer[baseIndex]     = p0.x;
     vertexBuffer[baseIndex + 1] = p0.y;

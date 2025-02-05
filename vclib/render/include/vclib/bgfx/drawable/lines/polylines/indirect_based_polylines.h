@@ -1,62 +1,109 @@
-#pragma once
-#include <vclib/bgfx/drawable/lines/drawable_polylines.h>
+/*****************************************************************************
+ * VCLib                                                                     *
+ * Visual Computing Library                                                  *
+ *                                                                           *
+ * Copyright(C) 2021-2025                                                    *
+ * Visual Computing Lab                                                      *
+ * ISTI - Italian National Research Council                                  *
+ *                                                                           *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This program is free software; you can redistribute it and/or modify      *
+ * it under the terms of the Mozilla Public License Version 2.0 as published *
+ * by the Mozilla Foundation; either version 2 of the License, or            *
+ * (at your option) any later version.                                       *
+ *                                                                           *
+ * This program is distributed in the hope that it will be useful,           *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the              *
+ * Mozilla Public License Version 2.0                                        *
+ * (https://www.mozilla.org/en-US/MPL/2.0/) for more details.                *
+ ****************************************************************************/
+
+#ifndef VCL_BGFX_DRAWABLE_LINES_POLYLINES_INDIRECT_BASED_POLYLINES_H
+#define VCL_BGFX_DRAWABLE_LINES_POLYLINES_INDIRECT_BASED_POLYLINES_H
+
+#include <vclib/bgfx/drawable/lines/common/lines.h>
+
+#include <vclib/bgfx/context.h>
 
 namespace vcl::lines {
-    class IndirectBasedPolylines : public DrawablePolylines {
-        
-        bgfx::ProgramHandle mJoinesPH = Context::instance().programManager().getProgram(
-                                            VclProgram::POLYLINES_INDIRECT_BASED_JOINS_VSFS);
 
-        bgfx::ProgramHandle mComputeIndirectPH = Context::instance().programManager().getProgram(
-                                                    VclProgram::POLYLINES_INDIRECT_BASED_CS);
+class IndirectBasedPolylines : public Lines
+{
+    static const inline std::vector<float> VERTICES =
+        {0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f};
+    static const inline std::vector<uint> INDICES = {0, 3, 1, 0, 2, 3};
 
-        bgfx::ProgramHandle mLinesPH = Context::instance().programManager().getProgram(
-                                            VclProgram::POLYLINES_INDIRECT_BASED_VSFS);
-                                            
+    bgfx::ProgramHandle mJoinesPH =
+        Context::instance().programManager().getProgram(
+            VclProgram::POLYLINES_INDIRECT_BASED_JOINS_VSFS);
 
-        static const inline std::vector<float>            mVertices = {0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f};
-        static const inline std::vector<uint32_t>         mIndexes = {0, 3, 1, 0, 2, 3};
-        
-        std::vector<LinesVertex>            mPoints;
+    bgfx::ProgramHandle mComputeIndirectPH =
+        Context::instance().programManager().getProgram(
+            VclProgram::POLYLINES_INDIRECT_BASED_CS);
 
-        bgfx::VertexBufferHandle            mVerticesBH             = BGFX_INVALID_HANDLE;
-        bgfx::IndexBufferHandle             mIndexesBH              = BGFX_INVALID_HANDLE;
-        bgfx::DynamicVertexBufferHandle     mPointsBH               = BGFX_INVALID_HANDLE;
-        bgfx::IndirectBufferHandle          mSegmentsIndirectBH     = BGFX_INVALID_HANDLE;
-        bgfx::IndirectBufferHandle          mJoinesIndirectBH       = BGFX_INVALID_HANDLE;
+    bgfx::ProgramHandle mLinesPH =
+        Context::instance().programManager().getProgram(
+            VclProgram::POLYLINES_INDIRECT_BASED_VSFS);
 
-        bgfx::UniformHandle                 mComputeIndirectDataUH  = BGFX_INVALID_HANDLE;
+    uint mPointsSize = 0;
 
+    bgfx::VertexBufferHandle        mVerticesBH         = BGFX_INVALID_HANDLE;
+    bgfx::IndexBufferHandle         mIndicesBH          = BGFX_INVALID_HANDLE;
+    bgfx::DynamicVertexBufferHandle mPointsBH           = BGFX_INVALID_HANDLE;
+    bgfx::IndirectBufferHandle      mSegmentsIndirectBH = BGFX_INVALID_HANDLE;
+    bgfx::IndirectBufferHandle      mJoinesIndirectBH   = BGFX_INVALID_HANDLE;
 
-        public:
-            IndirectBasedPolylines() = default;
+    bgfx::UniformHandle mComputeIndirectDataUH = BGFX_INVALID_HANDLE;
 
-            IndirectBasedPolylines(const std::vector<LinesVertex> &points);
+public:
+    IndirectBasedPolylines() { checkCaps(); }
 
-            IndirectBasedPolylines(const IndirectBasedPolylines& other);
+    IndirectBasedPolylines(const std::vector<LinesVertex>& points);
 
-            IndirectBasedPolylines(IndirectBasedPolylines&& other);
+    IndirectBasedPolylines(const IndirectBasedPolylines& other) = delete;
 
-            ~IndirectBasedPolylines();
+    IndirectBasedPolylines(IndirectBasedPolylines&& other);
 
-            IndirectBasedPolylines& operator=(IndirectBasedPolylines other);
+    ~IndirectBasedPolylines();
 
-            void swap(IndirectBasedPolylines& other);
+    IndirectBasedPolylines& operator=(const IndirectBasedPolylines& other) = delete;
 
-            std::shared_ptr<vcl::DrawableObject> clone() const override;
+    IndirectBasedPolylines& operator=(IndirectBasedPolylines&& other);
 
-            void draw(uint viewId) const override;
+    void swap(IndirectBasedPolylines& other);
 
-            void update(const std::vector<LinesVertex> &points) override;
+    void draw(uint viewId) const;
 
-        private:
+    void update(const std::vector<LinesVertex>& points);
 
-            void generateIndirectBuffers();
+private:
+    void generateIndirectBuffers();
 
-            void allocatePointsBuffer();
+    void allocatePointsBuffer();
 
-            void allocateVerticesBuffer();
+    void allocateVerticesBuffer();
 
-            void allocateIndexesBuffers();
-    };
-}
+    void allocateIndicesBuffers();
+
+    void setPointsBuffer(const std::vector<LinesVertex>& points);
+
+    void checkCaps() const
+    {
+        const bgfx::Caps* caps = bgfx::getCaps();
+        const bool computeSupported = bool(caps->supported & BGFX_CAPS_COMPUTE);
+        const bool indirectSupported =
+            bool(caps->supported & BGFX_CAPS_DRAW_INDIRECT);
+        const bool instancingSupported =
+            bool(caps->supported & BGFX_CAPS_INSTANCING);
+
+        if (!(instancingSupported && computeSupported && indirectSupported)) {
+            throw std::runtime_error("Instancing or compute are not supported");
+        }
+    }
+};
+
+} // namespace vcl::lines
+
+#endif // VCL_BGFX_DRAWABLE_LINES_POLYLINES_INDIRECT_BASED_POLYLINES_H

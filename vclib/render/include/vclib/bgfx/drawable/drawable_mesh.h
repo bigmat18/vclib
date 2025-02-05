@@ -23,11 +23,11 @@
 #ifndef VCL_BGFX_DRAWABLE_DRAWABLE_MESH_H
 #define VCL_BGFX_DRAWABLE_DRAWABLE_MESH_H
 
+#include <vclib/algorithms/mesh/stat/bounding_box.h>
 #include <vclib/render/drawable/abstract_drawable_mesh.h>
 
 #include <vclib/bgfx/context.h>
 #include <vclib/bgfx/drawable/mesh/mesh_render_buffers.h>
-#include <vclib/bgfx/drawable/uniforms/drawable_mesh_uniforms.h>
 #include <vclib/bgfx/drawable/uniforms/mesh_render_settings_uniforms.h>
 
 #include <bgfx/bgfx.h>
@@ -37,16 +37,19 @@ namespace vcl {
 template<MeshConcept MeshType>
 class DrawableMeshBGFX : public AbstractDrawableMesh, public MeshType
 {
+    Box3d mBoundingBox;
+
     MeshRenderBuffers<MeshType> mMRB;
 
     bgfx::ProgramHandle mProgram =
         Context::instance().programManager().getProgram(
             VclProgram::DRAWABLE_MESH);
 
-    DrawableMeshUniforms               mMeshUniforms;
     mutable MeshRenderSettingsUniforms mMeshRenderSettingsUniforms;
 
 public:
+    using AbstractDrawableMesh::name;
+
     DrawableMeshBGFX() = default;
 
     DrawableMeshBGFX(const MeshType& mesh) :
@@ -55,7 +58,27 @@ public:
         updateBuffers();
     }
 
+    DrawableMeshBGFX(const DrawableMeshBGFX& drawableMesh) :
+            AbstractDrawableMesh((const AbstractDrawableMesh&) drawableMesh),
+            MeshType(drawableMesh), mBoundingBox(drawableMesh.mBoundingBox),
+            mMeshRenderSettingsUniforms(
+                drawableMesh.mMeshRenderSettingsUniforms)
+    {
+        if constexpr (HasName<MeshType>) {
+            AbstractDrawableMesh::name() = drawableMesh.name();
+        }
+        mMRB.update(*this);
+    }
+
+    DrawableMeshBGFX(DrawableMeshBGFX&& drawableMesh) { swap(drawableMesh); }
+
     ~DrawableMeshBGFX() = default;
+
+    DrawableMeshBGFX& operator=(DrawableMeshBGFX drawableMesh)
+    {
+        swap(drawableMesh);
+        return *this;
+    }
 
     void updateBuffers() override
     {
@@ -63,11 +86,25 @@ public:
             AbstractDrawableMesh::name() = MeshType::name();
         }
 
-        mMRB = MeshRenderBuffers<MeshType>(*this);
+        bool bbToInitialize = !vcl::HasBoundingBox<MeshType>;
+        if constexpr (vcl::HasBoundingBox<MeshType>) {
+            if (this->MeshType::boundingBox().isNull()) {
+                bbToInitialize = true;
+            }
+            else {
+                mBoundingBox =
+                    this->MeshType::boundingBox().template cast<double>();
+            }
+        }
+
+        if (bbToInitialize) {
+            mBoundingBox = vcl::boundingBox(*this);
+        }
+
+        mMRB.update(*this);
         mMRS.setRenderCapabilityFrom(*this);
         mMRB.setWireframeSettings(mMRS);
         mMeshRenderSettingsUniforms.updateSettings(mMRS);
-        mMeshUniforms.update(mMRB);
     }
 
     void swap(DrawableMeshBGFX& other)
@@ -75,9 +112,9 @@ public:
         using std::swap;
         AbstractDrawableMesh::swap(other);
         MeshType::swap(other);
+        swap(mBoundingBox, other.mBoundingBox);
         swap(mMRB, other.mMRB);
         swap(mProgram, other.mProgram);
-        swap(mMeshUniforms, other.mMeshUniforms);
         swap(mMeshRenderSettingsUniforms, other.mMeshRenderSettingsUniforms);
     }
 
@@ -109,7 +146,7 @@ public:
                 mMRB.drawWireframe(viewId);
             }
 
-            if (mMRS.isPointCloudVisible()) {
+            if (mMRS.isPointVisible()) {
                 mMRB.bindVertexBuffers(mMRS);
                 bindUniforms(VCL_MRS_DRAWING_POINTS);
 
@@ -120,7 +157,7 @@ public:
 
             if (mMRS.isEdgesVisible()) {
                 mMRB.bindVertexBuffers(mMRS);
-                mMRB.bindIndexBuffers(mMRB.EDGES);
+                mMRB.bindIndexBuffers(MeshBufferId::EDGES);
                 bindUniforms(VCL_MRS_DRAWING_EDGES);
 
                 bgfx::setState(state | BGFX_STATE_PT_LINES);
@@ -130,10 +167,7 @@ public:
         }
     }
 
-    Box3d boundingBox() const override
-    {
-        return Box3d(mMRB.bbMin(), mMRB.bbMax());
-    }
+    Box3d boundingBox() const override { return mBoundingBox; }
 
     std::shared_ptr<DrawableObject> clone() const override
     {
@@ -149,7 +183,7 @@ public:
     void setRenderSettings(const MeshRenderSettings& rs) override
     {
         AbstractDrawableMesh::setRenderSettings(rs);
-        mMRB.setWireframeSettings(rs);
+        mMRB.setWireframeSettings(rs); // TODO check me
         mMeshRenderSettingsUniforms.updateSettings(rs);
     }
 
@@ -163,7 +197,7 @@ private:
     {
         mMeshRenderSettingsUniforms.updatePrimitive(primitive);
         mMeshRenderSettingsUniforms.bind();
-        mMeshUniforms.bind();
+        mMRB.bindUniforms();
     }
 };
 
