@@ -75,6 +75,7 @@ class MeshRenderBuffers
     DrawableMeshUniforms mMeshUniforms;
 
 public:
+
     MeshRenderBuffers() = default;
 
     MeshRenderBuffers(
@@ -123,7 +124,6 @@ public:
         mWireframeBHTexture.swap(other.mWireframeBHTexture);
 
         swap(mWireframeType, other.mWireframeType);
-
         swap(mTextureUnits, other.mTextureUnits);
         swap(mMeshUniforms, other.mMeshUniforms);
     }
@@ -174,6 +174,8 @@ public:
         }
     }
 
+    lines::LinesTypes getWireframeType() const { return mWireframeType; }
+
     void setWireframeType(const lines::LinesTypes type) 
     {
         mWireframeType = type;
@@ -223,23 +225,18 @@ public:
         switch(mWireframeType) {
             case lines::LinesTypes::CPU_GENERATED:
                 mWireframeBHCPU.draw(viewId);
-                std::cout << "CPU" << std::endl;
                 break;
             case lines::LinesTypes::GPU_GENERATED:
                 mWireframeBHGPU.draw(viewId);
-                std::cout << "GPU" << std::endl;
                 break;
             case lines::LinesTypes::INSTANCING_BASED:
                 mWireframeBHInstancing.draw(viewId);
-                std::cout << "Instancing" << std::endl;
                 break;
             case lines::LinesTypes::INDIRECT_BASED:
                 mWireframeBHIndirect.draw(viewId);
-                std::cout << "Indirect" << std::endl;
                 break;
             case lines::LinesTypes::TEXTURE_BASED:
                 mWireframeBHTexture.draw(viewId);
-                std::cout << "Texture" << std::endl;
                 break;
             default:
                 break;

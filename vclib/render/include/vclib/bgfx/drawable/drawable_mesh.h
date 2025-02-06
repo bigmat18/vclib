@@ -68,6 +68,7 @@ public:
             AbstractDrawableMesh::name() = drawableMesh.name();
         }
         mMRB.update(*this);
+        mMRB.setWireframeType(drawableMesh.mMRB.getWireframeType());
     }
 
     DrawableMeshBGFX(DrawableMeshBGFX&& drawableMesh) { swap(drawableMesh); }

@@ -22,13 +22,13 @@
 
 #include <vclib/bgfx/text/embedded_fonts/droid_sans.h>
 
-#include <assets/fonts/droidsans.ttf.bin.h>
+// #include <assets/fonts/droidsans.ttf.bin.h>
 
 namespace vcl {
 
 FontData vcl::EmbeddedFont<VclFont::DROID_SANS>::embeddedFont()
 {
-    return {droidsans, sizeof(droidsans)};
+    // return {droidsans, sizeof(droidsans)};
 }
 
 } // namespace vcl
