@@ -54,7 +54,7 @@ enum ColorToUse {
 
 class LinesSettings
 {
-private:
+public:
     uint8_t  mThickness;
     uint8_t  mAntialias;
     uint8_t  mBorder;
