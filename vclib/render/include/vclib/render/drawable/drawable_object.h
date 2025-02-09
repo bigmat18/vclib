@@ -53,6 +53,8 @@ namespace vcl {
  */
 class DrawableObject
 {
+    
+protected:
     std::string mName; /**< @brief Name of the object */
 
     std::string mInfo; /**< @brief Info about the object */
