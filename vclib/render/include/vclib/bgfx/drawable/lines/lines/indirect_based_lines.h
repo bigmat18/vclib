@@ -68,9 +68,9 @@ public:
 
     void swap(IndirectBasedLines& other);
 
-    void draw(uint viewId) const;
+    void draw(uint viewId) const override;
 
-    void update(const std::vector<LinesVertex>& points);
+    void update(const std::vector<LinesVertex>& points) override;
 
 private:
     void allocatePointsBuffer();

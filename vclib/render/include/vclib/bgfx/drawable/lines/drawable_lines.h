@@ -108,10 +108,6 @@ public:
     bool isVisible() const override { return mVisible; }
 
     void setVisibility(bool vis) override { mVisible = vis; }
-
-    void setName(const std::string& name) { mName = name; }
-
-    void setInfo(const std::string& info) { mInfo = info; }
 };
 
 using DrawableCPULines = DrawableLines<CPUGeneratedLines>;

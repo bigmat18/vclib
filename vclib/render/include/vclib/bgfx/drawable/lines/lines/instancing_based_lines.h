@@ -62,9 +62,9 @@ public:
 
     void swap(InstancingBasedLines& other);
 
-    void draw(uint viewId) const;
+    void draw(uint viewId) const override;
 
-    void update(const std::vector<LinesVertex>& points);
+    void update(const std::vector<LinesVertex>& points) override;
 
 private:
     void generateInstanceDataBuffer() const;

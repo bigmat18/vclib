@@ -48,6 +48,10 @@ public:
 
     friend void swap(Lines& a, Lines& b) { a.swap(b); }
 
+    virtual void draw(uint viewId) const {};
+
+    virtual void update(const std::vector<LinesVertex>& points) {};
+
 protected:
     void bindSettingsUniformLines() const
     {
