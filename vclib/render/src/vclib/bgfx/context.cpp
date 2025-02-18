@@ -189,7 +189,7 @@ void Context::resetDefaultFramebuffer(
     bgfx::TextureFormat::Enum colorFormat)
 {
     // TODO: manage the reset flags elsewhere
-    bgfx::reset(width, height, BGFX_RESET_VSYNC, colorFormat);
+    bgfx::reset(width, height, 0, colorFormat);
 }
 
 bgfx::FrameBufferHandle Context::createFramebufferAndInitView(
