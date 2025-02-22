@@ -110,14 +110,14 @@ void TextureBasedLines::draw(uint viewId) const
 void TextureBasedLines::update(const std::vector<LinesVertex>& points)
 {
     int oldSize = mPointsSize;
-    mPointsSize     = points.size();
-
-    setPointsBuffer(points);
-
+    mPointsSize = points.size();
+    
     if (oldSize < mPointsSize) {
+        bgfx::destroy(mTextureBH);
         allocateTextureBuffer();
     }
-
+    
+    setPointsBuffer(points);
     generateTextureBuffer();
 }
 
