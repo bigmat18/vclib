@@ -20,13 +20,23 @@
  * (https://www.mozilla.org/en-US/MPL/2.0/) for more details.                *
  ****************************************************************************/
 
-#ifndef VCL_BGFX_PROGRAMS_COMPUTE_PROGRAM_H
-#define VCL_BGFX_PROGRAMS_COMPUTE_PROGRAM_H
+#ifndef VCL_BGFX_PROGRAMS_EMBEDDED_VF_PROGRAMS_CUSTOM_CPU_INSTANCING_LINES_H
+#define VCL_BGFX_PROGRAMS_EMBEDDED_VF_PROGRAMS_CUSTOM_CPU_INSTANCING_LINES_H
+
+#include <vclib/bgfx/programs/vert_frag_loader.h>
 
 namespace vcl {
 
-enum class ComputeProgram { DRAWABLE_MESH_POINTS, CUSTOM_GPU_GENERATED_LINES, COUNT };
+template<>
+struct VertFragLoader<VertFragProgram::CUSTOM_CPU_INSTANCING_LINES>
+{
+    static bgfx::EmbeddedShader::Data vertexShader(
+        bgfx::RendererType::Enum type);
+
+    static bgfx::EmbeddedShader::Data fragmentShader(
+        bgfx::RendererType::Enum type);
+};
 
 } // namespace vcl
 
-#endif // VCL_BGFX_PROGRAMS_COMPUTE_PROGRAM_H
+#endif // VCL_BGFX_PROGRAMS_EMBEDDED_VF_PROGRAMS_CUSTOM_CPU_INSTANCING_LINES_H

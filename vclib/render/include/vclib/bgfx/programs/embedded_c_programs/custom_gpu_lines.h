@@ -20,15 +20,15 @@
  * (https://www.mozilla.org/en-US/MPL/2.0/) for more details.                *
  ****************************************************************************/
 
-#ifndef VCL_BGFX_PROGRAMS_EMBEDDED_C_PROGRAMS_CUSTOM_GPU_LINES_H
-#define VCL_BGFX_PROGRAMS_EMBEDDED_C_PROGRAMS_CUSTOM_GPU_LINES_H
+#ifndef VCL_BGFX_PROGRAMS_EMBEDDED_C_PROGRAMS_CUSTOM_GPU_GENERATED_LINES_H
+#define VCL_BGFX_PROGRAMS_EMBEDDED_C_PROGRAMS_CUSTOM_GPU_GENERATED_LINES_H
 
 #include <vclib/bgfx/programs/compute_loader.h>
 
 namespace vcl {
 
 template<>
-struct ComputeLoader<ComputeProgram::CUSTOM_GPU_LINES>
+struct ComputeLoader<ComputeProgram::CUSTOM_GPU_GENERATED_LINES>
 {
     static bgfx::EmbeddedShader::Data computeShader(
         bgfx::RendererType::Enum type);
@@ -36,4 +36,4 @@ struct ComputeLoader<ComputeProgram::CUSTOM_GPU_LINES>
 
 } // namespace vcl
 
-#endif // VCL_BGFX_PROGRAMS_EMBEDDED_C_PROGRAMS_CUSTOM_GPU_LINES_H
+#endif // VCL_BGFX_PROGRAMS_EMBEDDED_C_PROGRAMS_CUSTOM_GPU_GENERATED_LINES_H

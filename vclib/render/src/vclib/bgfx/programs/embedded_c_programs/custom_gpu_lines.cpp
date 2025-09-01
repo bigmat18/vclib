@@ -38,7 +38,7 @@
 
 namespace vcl {
 
-bgfx::EmbeddedShader::Data vcl::ComputeLoader<ComputeProgram::CUSTOM_GPU_LINES>::
+bgfx::EmbeddedShader::Data vcl::ComputeLoader<ComputeProgram::CUSTOM_GPU_GENERATED_LINES>::
     computeShader(bgfx::RendererType::Enum type)
 {
     switch (type) {

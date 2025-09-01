@@ -37,12 +37,12 @@ class GPUGeneratedLines
     bgfx::ProgramHandle mComputeVerticesPH =
         Context::instance()
             .programManager()
-            .getComputeProgram<ComputeProgram::CUSTOM_GPU_LINES>();
+            .getComputeProgram<ComputeProgram::CUSTOM_GPU_GENERATED_LINES>();
 
     bgfx::ProgramHandle mLinesPH =
         Context::instance()
             .programManager()
-            .getProgram<VertFragProgram::CUSTOM_CPU_LINES>();
+            .getProgram<VertFragProgram::CUSTOM_CPU_GENERATED_LINES>();
 
 
     Uniform mCustomIndicesUH = Uniform("u_ActiveBuffers", bgfx::UniformType::Vec4);

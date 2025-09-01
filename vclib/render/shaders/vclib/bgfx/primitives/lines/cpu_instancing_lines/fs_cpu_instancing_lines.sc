@@ -20,13 +20,21 @@
  * (https://www.mozilla.org/en-US/MPL/2.0/) for more details.                *
  ****************************************************************************/
 
-#ifndef VCL_BGFX_PROGRAMS_COMPUTE_PROGRAM_H
-#define VCL_BGFX_PROGRAMS_COMPUTE_PROGRAM_H
+$input v_color, v_normal
 
-namespace vcl {
+#include <vclib/bgfx/drawable/uniforms/directional_light_uniforms.sh>
+#include <vclib/bgfx/shaders_common.sh> 
 
-enum class ComputeProgram { DRAWABLE_MESH_POINTS, CUSTOM_GPU_GENERATED_LINES, COUNT };
+#include <bgfx_shader.sh>
+#include <bgfx_compute.sh>
 
-} // namespace vcl
+uniform vec4 u_settings;
+#define u_shadingPerVertex bool(u_settings.w)
 
-#endif // VCL_BGFX_PROGRAMS_COMPUTE_PROGRAM_H
+void main() {
+    vec4 color = v_color;
+    if (u_shadingPerVertex) {
+        color *= computeLight(u_lightDir, u_lightColor, v_normal);
+    }
+    gl_FragColor = color;
+}

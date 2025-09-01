@@ -20,64 +20,86 @@
  * (https://www.mozilla.org/en-US/MPL/2.0/) for more details.                *
  ****************************************************************************/
 
-#ifndef VCL_BGFX_PRIMITIVES_LINES_CPU_GENERATED_LINES_H
-#define VCL_BGFX_PRIMITIVES_LINES_CPU_GENERATED_LINES_H
+#ifndef VCL_BGFX_PRIMITIVES_LINES_CPU_INSTANCING_LINES_H
+#define VCL_BGFX_PRIMITIVES_LINES_CPU_INSTANCING_LINES_H
 
 #include <vclib/bgfx/buffers.h>
 #include <vclib/bgfx/context.h>
 
 namespace vcl::detail {
 
-class CPUGeneratedLines
+class CPUInstancingLines
 {
+    static inline const std::vector<float> VERTICES =
+        {0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f};
+    static inline const std::vector<uint> INDICES = {0, 1, 2, 1, 3, 2};
+
     bgfx::ProgramHandle mLinesPH =
         Context::instance()
             .programManager()
-            .getProgram<VertFragProgram::CUSTOM_CPU_GENERATED_LINES>();
+            .getProgram<VertFragProgram::CUSTOM_CPU_INSTANCING_LINES>();
 
-    VertexBuffer mVertexCoords;
-    VertexBuffer mVertexNormals;
-    VertexBuffer mVertexColors;
-    VertexBuffer mLineColors;
+    std::vector<float> mVertCoords;
+    std::vector<uint>  mLineIndices;
+    std::vector<float> mVertNormals;
+    std::vector<uint> mVertColors;
+    std::vector<uint> mLineColors;
 
+    VertexBuffer mVertices;
     IndexBuffer  mIndices;
 
-public:
-    CPUGeneratedLines() = default;
+    mutable bgfx::InstanceDataBuffer mInstanceDB;
 
-    CPUGeneratedLines(
+public:
+    CPUInstancingLines();
+
+    CPUInstancingLines(
         const std::vector<float>& vertCoords,
         const std::vector<float>& vertNormals = std::vector<float>(),
-        const std::vector<uint>&  vertColors = std::vector<uint>(),
-        const std::vector<uint>&  lineColors = std::vector<uint>());
+        const std::vector<uint>&  vertColors  = std::vector<uint>(),
+        const std::vector<uint>&  lineColors  = std::vector<uint>());
 
-    CPUGeneratedLines(
+    CPUInstancingLines(
         const std::vector<float>& vertCoords,
         const std::vector<uint>&  lineIndices,
         const std::vector<float>& vertNormals = std::vector<float>(),
-        const std::vector<uint>&  vertColors = std::vector<uint>(),
-        const std::vector<uint>&  lineColors = std::vector<uint>());
+        const std::vector<uint>&  vertColors  = std::vector<uint>(),
+        const std::vector<uint>&  lineColors  = std::vector<uint>());
 
-    void swap(CPUGeneratedLines& other);
+    void swap(CPUInstancingLines& other);
 
-    friend void swap(CPUGeneratedLines& a, CPUGeneratedLines& b) { a.swap(b); }
-
-    void setPoints(
-        const std::vector<float>& vertCoords,
-        const std::vector<uint>& lineIndices,
-        const std::vector<float>& vertNormals = std::vector<float>(),
-        const std::vector<uint>&  vertColors = std::vector<uint>(),
-        const std::vector<uint>&  lineColors = std::vector<uint>());
+    friend void swap(CPUInstancingLines& a, CPUInstancingLines& b) { a.swap(b); }
 
     void setPoints(
         const std::vector<float>& vertCoords,
+        const std::vector<uint>&  lineIndices,
         const std::vector<float>& vertNormals = std::vector<float>(),
-        const std::vector<uint>&  vertColors = std::vector<uint>(),
-        const std::vector<uint>&  lineColors = std::vector<uint>());
+        const std::vector<uint>&  vertColors  = std::vector<uint>(),
+        const std::vector<uint>&  lineColors  = std::vector<uint>());
+
+    void setPoints(
+        const std::vector<float>& vertCoords,
+        const std::vector<float>& vertNormals = std::vector<float>(),
+        const std::vector<uint>&  vertColors  = std::vector<uint>(),
+        const std::vector<uint>&  lineColors  = std::vector<uint>());
 
     void draw(uint viewId) const;
+
+private:
+    void checkCaps() const
+    {
+        const bgfx::Caps* caps = bgfx::getCaps();
+        const bool instancingSupported =
+            bool(caps->supported & BGFX_CAPS_INSTANCING);
+
+        if (!instancingSupported) {
+            throw std::runtime_error("Instancing or compute are not supported");
+        }
+    }
+
+    void generateInstanceDataBuffer() const;
 };
 
 } // namespace vcl::detail
 
-#endif // VCL_BGFX_PRIMITIVES_LINES_CPU_GENERATED_LINES_H
+#endif // VCL_BGFX_PRIMITIVES_LINES_CPU_INSTANCING_LINES_H

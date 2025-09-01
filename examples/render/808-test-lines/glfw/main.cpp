@@ -68,7 +68,7 @@ public:
         int selected = mSelected;
 
         ImGui::Begin("Showing");
-        const char* items[] = { "Primitive", "CPU Generated", "GPU Generated" };
+        const char* items[] = { "Primitive", "CPU Generated", "GPU Generated", "CPU Instancing" };
         for (int i = 0; i < vcl::toUnderlying(COUNT); ++i) {
             ImGui::RadioButton(items[i], &selected, i);
         }
