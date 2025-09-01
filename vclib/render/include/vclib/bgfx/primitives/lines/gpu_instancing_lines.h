@@ -20,8 +20,8 @@
  * (https://www.mozilla.org/en-US/MPL/2.0/) for more details.                *
  ****************************************************************************/
 
-#ifndef VCL_BGFX_PRIMITIVES_LINES_GPU_GENERATED_LINES_H
-#define VCL_BGFX_PRIMITIVES_LINES_GPU_GENERATED_LINES_H
+#ifndef VCL_BGFX_PRIMITIVES_LINES_GPU_INSTANCING_LINES_H
+#define VCL_BGFX_PRIMITIVES_LINES_GPU_INSTANCING_LINES_H
 
 #include <vclib/bgfx/buffers.h>
 #include <vclib/bgfx/context.h>
@@ -32,17 +32,22 @@
 
 namespace vcl::detail {
 
-class GPUGeneratedLines
+class GPUInstancingLines
 {
-    bgfx::ProgramHandle mComputeVerticesPH =
+    static inline const std::vector<float> VERTICES =
+        {0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f};
+    static inline const std::vector<uint> INDICES = {0, 1, 2, 1, 3, 2};
+
+
+    bgfx::ProgramHandle mComputeInstancingPH =
         Context::instance()
             .programManager()
-            .getComputeProgram<ComputeProgram::CUSTOM_GPU_GENERATED_LINES>();
+            .getComputeProgram<ComputeProgram::CUSTOM_GPU_INSTANCING_LINES>();
 
     bgfx::ProgramHandle mLinesPH =
         Context::instance()
             .programManager()
-            .getProgram<VertFragProgram::CUSTOM_CPU_GENERATED_LINES>();
+            .getProgram<VertFragProgram::CUSTOM_CPU_INSTANCING_LINES>();
 
 
     Uniform mCustomIndicesUH = Uniform("u_ActiveBuffers", bgfx::UniformType::Vec4);
@@ -56,30 +61,33 @@ class GPUGeneratedLines
     VertexBuffer mVertices;
     IndexBuffer  mIndices;
 
-public:
-    GPUGeneratedLines() { checkCaps(); }
+    VertexBuffer mInstanceData;
+    uint mNumPoints = 0;
 
-    GPUGeneratedLines(
+public:
+    GPUInstancingLines();
+
+    GPUInstancingLines(
         const std::vector<float>& vertCoords,
         const std::vector<float>& vertNormals = std::vector<float>(),
         const std::vector<uint>&  vertColors = std::vector<uint>(),
         const std::vector<uint>&  lineColors = std::vector<uint>());
 
-    GPUGeneratedLines(
+    GPUInstancingLines(
         const std::vector<float>& vertCoords,
         const std::vector<uint>&  lineIndices,
         const std::vector<float>& vertNormals = std::vector<float>(),
         const std::vector<uint>&  vertColors = std::vector<uint>(),
         const std::vector<uint>&  lineColors = std::vector<uint>());
 
-    GPUGeneratedLines(
+    GPUInstancingLines(
         const uint pointsSize,
         const VertexBuffer& vertexCoords,
         const VertexBuffer& vertexNormals = VertexBuffer(),
         const VertexBuffer& vertexColors = VertexBuffer(),
         const VertexBuffer& lineColors = VertexBuffer());
 
-    GPUGeneratedLines(
+    GPUInstancingLines(
         const uint pointsSize,
         const VertexBuffer& vertexCoords,
         const IndexBuffer&  lineIndices,
@@ -87,19 +95,19 @@ public:
         const VertexBuffer& vertexColors = VertexBuffer(),
         const VertexBuffer& lineColors = VertexBuffer());
 
-    void swap(GPUGeneratedLines& other);
+    void swap(GPUInstancingLines& other);
 
-    friend void swap(GPUGeneratedLines& a, GPUGeneratedLines& b) { a.swap(b); }
+    friend void swap(GPUInstancingLines& a, GPUInstancingLines& b) { a.swap(b); }
+
+    void setPoints(
+        const std::vector<float>& vertCoords,
+        const std::vector<float>& vertNormals = std::vector<float>(),
+        const std::vector<uint>&  vertColors = std::vector<uint>(),
+        const std::vector<uint>&  lineColors = std::vector<uint>());
     
     void setPoints(
         const std::vector<float>& vertCoords,
         const std::vector<uint>& lineIndices,
-        const std::vector<float>& vertNormals = std::vector<float>(),
-        const std::vector<uint>&  vertColors = std::vector<uint>(),
-        const std::vector<uint>&  lineColors = std::vector<uint>());
-        
-    void setPoints(
-         const std::vector<float>& vertCoords,
         const std::vector<float>& vertNormals = std::vector<float>(),
         const std::vector<uint>&  vertColors = std::vector<uint>(),
         const std::vector<uint>&  lineColors = std::vector<uint>());
@@ -126,8 +134,13 @@ private:
     {
         const bgfx::Caps* caps = bgfx::getCaps();
         const bool computeSupported = bool(caps->supported & BGFX_CAPS_COMPUTE);
-        if (!computeSupported) {
-            throw std::runtime_error("GPU compute not supported");
+        const bool indirectSupported =
+            bool(caps->supported & BGFX_CAPS_DRAW_INDIRECT);
+        const bool instancingSupported =
+            bool(caps->supported & BGFX_CAPS_INSTANCING);
+
+        if (!(instancingSupported && computeSupported && indirectSupported)) {
+            throw std::runtime_error("Instancing or compute are not supported");
         }
     }
     
@@ -141,18 +154,18 @@ private:
     
     void allocateVertexLineColors(const std::vector<uint>& lineColors);
     
-    void allocateVertexAndIndexBuffer(const uint pointsSize);
+    void allocateVertexAndIndexBuffer();
 
-    void generateVertexAndIndexBuffer(
-        const uint pointsSize,
+    void allocateInstanceDataBuffer();
+
+    void generateInstanceDataBuffer(
         const VertexBuffer& vertexCoords,
         const IndexBuffer&  lineIndices,
         const VertexBuffer& vertexNormals,
         const VertexBuffer& vertexColors,
-        const VertexBuffer& lineColors
-    );
+        const VertexBuffer& lineColors);
 };
 
 } // namespace vcl::detail
 
-#endif // VCL_BGFX_PRIMITIVES_LINES_GPU_GENERATED_LINES_H
+#endif // VCL_BGFX_PRIMITIVES_LINES_GPU_INSTANCING_LINES_H

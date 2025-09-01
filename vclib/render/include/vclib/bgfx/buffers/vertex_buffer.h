@@ -264,6 +264,13 @@ public:
             bgfx::setVertexBuffer(stream, mHandle);
         }
     }
+
+    void setInstance(uint start, uint numInstance) const 
+    {
+        if (bgfx::isValid(mHandle)) {
+            bgfx::setInstanceDataBuffer(mHandle, start, numInstance);
+        }
+    }
 };
 
 } // namespace vcl
