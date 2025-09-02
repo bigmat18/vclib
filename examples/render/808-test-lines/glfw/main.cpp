@@ -69,7 +69,7 @@ public:
 
         ImGui::Begin("Showing");
         const char* items[] = { "Primitive", "CPU Generated", "GPU Generated", 
-                                "CPU Instancing", "GPU Instancing" };
+                                "CPU Instancing", "GPU Instancing", "Texture Instancing" };
         for (int i = 0; i < vcl::toUnderlying(COUNT); ++i) {
             ImGui::RadioButton(items[i], &selected, i);
         }

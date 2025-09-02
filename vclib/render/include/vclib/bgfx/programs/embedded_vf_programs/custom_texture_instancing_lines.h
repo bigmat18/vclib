@@ -20,12 +20,23 @@
  * (https://www.mozilla.org/en-US/MPL/2.0/) for more details.                *
  ****************************************************************************/
 
-#ifndef VCL_BGFX_PROGRAMS_EMBEDDED_C_PROGRAMS_H
-#define VCL_BGFX_PROGRAMS_EMBEDDED_C_PROGRAMS_H
+#ifndef VCL_BGFX_PROGRAMS_EMBEDDED_VF_PROGRAMS_CUSTOM_TEXTURE_INSTANCING_LINES_H
+#define VCL_BGFX_PROGRAMS_EMBEDDED_VF_PROGRAMS_CUSTOM_TEXTURE_INSTANCING_LINES_H
 
-#include "embedded_c_programs/drawable_mesh_points.h"
-#include "embedded_c_programs/custom_texture_instancing_lines.h"
-#include "embedded_c_programs/custom_gpu_instancing_lines.h"
-#include "embedded_c_programs/custom_gpu_lines.h"
+#include <vclib/bgfx/programs/vert_frag_loader.h>
 
-#endif // VCL_BGFX_PROGRAMS_EMBEDDED_C_PROGRAMS_H
+namespace vcl {
+
+template<>
+struct VertFragLoader<VertFragProgram::CUSTOM_TEXTURE_INSTANCING_LINES>
+{
+    static bgfx::EmbeddedShader::Data vertexShader(
+        bgfx::RendererType::Enum type);
+
+    static bgfx::EmbeddedShader::Data fragmentShader(
+        bgfx::RendererType::Enum type);
+};
+
+} // namespace vcl
+
+#endif // VCL_BGFX_PROGRAMS_EMBEDDED_VF_PROGRAMS_CUSTOM_TEXTURE_INSTANCING_LINES_H

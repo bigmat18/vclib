@@ -20,12 +20,21 @@
  * (https://www.mozilla.org/en-US/MPL/2.0/) for more details.                *
  ****************************************************************************/
 
-#ifndef VCL_BGFX_PROGRAMS_EMBEDDED_C_PROGRAMS_H
-#define VCL_BGFX_PROGRAMS_EMBEDDED_C_PROGRAMS_H
+$input v_color, v_normal
 
-#include "embedded_c_programs/drawable_mesh_points.h"
-#include "embedded_c_programs/custom_texture_instancing_lines.h"
-#include "embedded_c_programs/custom_gpu_instancing_lines.h"
-#include "embedded_c_programs/custom_gpu_lines.h"
+#include <vclib/bgfx/drawable/uniforms/directional_light_uniforms.sh>
+#include <vclib/bgfx/shaders_common.sh> 
 
-#endif // VCL_BGFX_PROGRAMS_EMBEDDED_C_PROGRAMS_H
+#include <bgfx_shader.sh>
+#include <bgfx_compute.sh>
+
+uniform vec4 u_settings;
+#define u_shadingPerVertex bool(u_settings.w)
+
+void main() {
+    vec4 color = v_color;
+    if (u_shadingPerVertex) {
+        color *= computeLight(u_lightDir, u_lightColor, v_normal);
+    }
+    gl_FragColor = color;
+}
